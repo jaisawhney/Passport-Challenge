@@ -3,38 +3,50 @@ const router = express.Router();
 const connectEnsureLogin = require('connect-ensure-login');
 const passport = require('passport');
 
-
-
-
-// Define routes.
-
-// home route
+// Index
 router.get('/',
     (req, res) => {
-        res.render('home', { user: req.user });
+        res.render('home', {user: req.user});
     });
 
-// route to display login form
+// Login (form)
 router.get('/login',
     (req, res) => {
         res.render('login');
     });
-// Route to submit login form. It uses passport.authenticate
+
+// Login (post)
 router.post('/login',
-    passport.authenticate('local', { failureRedirect: '/login' }),
+    passport.authenticate('local', {failureRedirect: '/login'}),
     (req, res) => {
         res.redirect('/');
     });
 
-// TODO: Complete route to logout of passport session    
-router.get('/logout', /*implement the logout route with req.logout()*/);
+// Logout
+router.get('/logout',
+    (req, res) => {
+        req.logout();
+        return res.redirect("/");
+    });
 
 
-// connectEnsureLogin acting as route guard to make sure the routes can't be accessed if not logged in
+// Show profile
 router.get('/profile',
     connectEnsureLogin.ensureLoggedIn(),
     (req, res) => {
-        res.render('profile', { user: req.user });
+        res.render('profile', {user: req.user});
+    });
+
+// Auth with github
+router.get('/auth/github',
+    passport.authenticate('github'), () => {
+    });
+
+// Auth callback
+router.get('/auth/github/callback',
+    passport.authenticate('github', {failureRedirect: '/login'}),
+    (req, res) => {
+        return res.redirect("/");
     });
 
 module.exports = router;
